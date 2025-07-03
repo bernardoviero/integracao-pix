@@ -35,16 +35,16 @@ jobs:
 
             # Criar .env dentro do container
             if [ "${{ github.ref_name }}" = "main" ]; then
-              docker exec $CONTAINER_NAME sh -c "echo '${{ secrets.ENV_PRD }}' > .env"
+              sudo docker exec $CONTAINER_NAME sh -c "echo '${{ secrets.ENV_PRD }}' > .env"
             elif [ "${{ github.ref_name }}" = "homologacao" ]; then
-              docker exec $CONTAINER_NAME sh -c "echo '${{ secrets.ENV_HML }}' > .env"
+              sudo docker exec $CONTAINER_NAME sh -c "echo '${{ secrets.ENV_HML }}' > .env"
             fi
 
             # Rodar artisan dentro do container
-            docker exec $CONTAINER_NAME php artisan config:clear
-            docker exec $CONTAINER_NAME php artisan config:cache
+            sudo docker exec $CONTAINER_NAME php artisan config:clear
+            sudo docker exec $CONTAINER_NAME php artisan config:cache
 
             # Apagar o .env dentro do container
-            docker exec $CONTAINER_NAME rm .env
+            sudo docker exec $CONTAINER_NAME rm .env
 
             echo "✅ Deploy finalizado com .env temporário dentro do container"

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - homologacao
 
 jobs:
   deploy:
@@ -11,6 +12,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set up .env file
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "${{ secrets.ENV_PRD }}" > .env
+          elif [ "${{ github.ref }}" = "refs/heads/homologacao" ]; then
+            echo "${{ secrets.ENV_HML }}" > .env
+          fi
+
+      - name: Show env (teste)
+        run: cat .env
 
       - name: Add known_hosts
         run: |

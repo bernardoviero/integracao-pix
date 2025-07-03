@@ -20,5 +20,4 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            cd /var/www/html/integracao-pix
-            git pull origin main
+            docker exec laravel_app bash -c "cd /var/www/html/integracao-pix && git pull origin main"

@@ -25,5 +25,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            cd /home/ubuntu/integracao-pix
+            cd /home/ubuntu/project/integracao-pix
             git pull origin main

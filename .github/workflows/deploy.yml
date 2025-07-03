@@ -9,27 +9,17 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Set up .env file
-        run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "${{ secrets.ENV_PRD }}" > .env
-          elif [ "${{ github.ref }}" = "refs/heads/homologacao" ]; then
-            echo "${{ secrets.ENV_HML }}" > .env
-          fi
-
-      - name: Show env (teste)
-        run: cat .env
 
       - name: Add known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Server
+      - name: Deploy to Server (Laravel com .env temporário)
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -38,4 +28,20 @@ jobs:
           port: 22
           script: |
             cd /home/ubuntu/project/integracao-pix
-            git pull origin main
+            git pull origin ${{ github.ref_name }}
+
+            # Escolhe o conteúdo do .env conforme a branch
+            if [ "${{ github.ref_name }}" = "main" ]; then
+              echo "${{ secrets.ENV_PRD }}" > .env
+            elif [ "${{ github.ref_name }}" = "homologacao" ]; then
+              echo "${{ secrets.ENV_HML }}" > .env
+            fi
+
+            # Cache de configuração Laravel
+            php artisan config:clear
+            php artisan config:cache
+
+            # Remove o .env após gerar o cache
+            rm -f .env
+
+            echo "✅ Deploy finalizado com .env temporário"

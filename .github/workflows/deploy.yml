@@ -30,18 +30,21 @@ jobs:
             cd /home/ubuntu/project/integracao-pix
             git pull origin ${{ github.ref_name }}
 
-            # Escolhe o conteúdo do .env conforme a branch
+            # Definir caminho do container (substitua pelo nome correto)
+            CONTAINER_NAME=laravel_app
+
+            # Criar .env dentro do container
             if [ "${{ github.ref_name }}" = "main" ]; then
-              echo "${{ secrets.ENV_PRD }}" > .env
+              docker exec $CONTAINER_NAME sh -c "echo '${{ secrets.ENV_PRD }}' > .env"
             elif [ "${{ github.ref_name }}" = "homologacao" ]; then
-              echo "${{ secrets.ENV_HML }}" > .env
+              docker exec $CONTAINER_NAME sh -c "echo '${{ secrets.ENV_HML }}' > .env"
             fi
 
-            # Cache de configuração Laravel
-            php artisan config:clear
-            php artisan config:cache
+            # Rodar artisan dentro do container
+            docker exec $CONTAINER_NAME php artisan config:clear
+            docker exec $CONTAINER_NAME php artisan config:cache
 
-            # Remove o .env após gerar o cache
-            rm -f .env
+            # Apagar o .env dentro do container
+            docker exec $CONTAINER_NAME rm .env
 
-            echo "✅ Deploy finalizado com .env temporário"
+            echo "✅ Deploy finalizado com .env temporário dentro do container"
